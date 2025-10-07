@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   Int       @id @default(autoincrement())
+  username             String    @unique
+  email                String    @unique
+  password_hash        String
+  role                 String    @default("user")
+  score                Int       @default(0)
+  money                Int       @default(100)
+  created_at           DateTime  @default(now())
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  profile_picture      Bytes?
+
+  gamesCreated Game[]       @relation("CreatedGames")
+  gamePlayers  GamePlayer[]
+  roundsWon    Round[]      @relation("RoundWinners")
+}
+
+model Game {
+  uuid        String       @id @default(uuid())
+  created_by  Int
+  players     Int
+  status      String
+  created_at  DateTime     @default(now())
+  playtime    String?
+  creator     User         @relation("CreatedGames", fields: [created_by], references: [id])
+  playersList GamePlayer[]
+  rounds      Round[]
+}
+
+model GamePlayer {
+  id        Int     @id @default(autoincrement())
+  game_uuid String
+  user_id   Int
+  end_coins Int     @default(0)
+  is_winner Boolean @default(false)
+
+  game Game @relation(fields: [game_uuid], references: [uuid])
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Round {
+  id           Int    @id @default(autoincrement())
+  game_id      String
+  round_number Int
+  winner_id    Int?
+  result       Json
+
+  game   Game  @relation(fields: [game_id], references: [uuid])
+  winner User? @relation("RoundWinners", fields: [winner_id], references: [id])
+}
