@@ -17,4 +17,6 @@ router.post("/login", authController.login);
 // router.get('/reset-password/:token', authController.showResetPassword);
 // router.post('/reset-password/:token', authController.resetPassword);
 
+router.get("/verify-email/:token", authController.verifyEmail);
+
 export default router;

@@ -1,6 +1,8 @@
 import prisma from "../prisma/client.js";
 import { generateToken } from "../utils/jwt.js";
 import { hashPassword, comparePassword } from "../utils/hash.js";
+import { sendVerificationEmail } from "../utils/mailer.js";
+import { randomUUID } from "crypto";
 
 const authController = {
     register: async (req, res) => {
@@ -11,12 +13,39 @@ const authController = {
             if (existing) return res.status(400).json({ error: "Email already in use" });
 
             const password_hash = await hashPassword(password);
+            const verificationToken = randomUUID();
+
             const user = await prisma.user.create({
-                data: { username, email, password_hash },
+                data: {
+                    username,
+                    email,
+                    password_hash,
+                    verificationToken,
+                },
             });
 
-            const token = generateToken(user);
-            res.json({ message: "User registered", token });
+            await sendVerificationEmail(user, verificationToken);
+
+            res.json({ message: "User registered. Please verify your email before logging in." });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: "Internal server error" });
+        }
+    },
+
+    verifyEmail: async (req, res) => {
+        const { token } = req.params;
+
+        try {
+            const user = await prisma.user.findFirst({ where: { verificationToken: token } });
+            if (!user) return res.status(400).json({ error: "Invalid or expired verification token" });
+
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { isVerified: true, verificationToken: null },
+            });
+
+            res.json({ message: "Email verified successfully!" });
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: "Internal server error" });
@@ -29,6 +58,9 @@ const authController = {
         try {
             const user = await prisma.user.findUnique({ where: { email } });
             if (!user) return res.status(400).json({ error: "Invalid credentials" });
+
+            if (!user.isVerified)
+                return res.status(401).json({ error: "Please verify your email first." });
 
             const valid = await comparePassword(password, user.password_hash);
             if (!valid) return res.status(400).json({ error: "Invalid credentials" });
