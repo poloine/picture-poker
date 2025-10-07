@@ -25,6 +25,8 @@ model User {
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
   profile_picture      Bytes?
+  isVerified           Boolean   @default(false)
+  verificationToken    String?
 
   gamesCreated Game[]       @relation("CreatedGames")
   gamePlayers  GamePlayer[]
