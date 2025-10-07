@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "cleanup": "node scripts/cleanupTokens.js"
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
