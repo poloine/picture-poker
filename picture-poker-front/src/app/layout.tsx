@@ -1,19 +1,28 @@
-import "./globals.css";
+import "@/styles/globals.css";
+import "@/styles/themes.css";
+import { ThemeProvider } from "@/context/ThemeContext";
 import Header from "@/components/Header";
+import {Metadata} from "next";
 import Footer from "@/components/Footer";
 
-export const metadata = {
+export const metadata: Metadata = {
     title: "Picture Poker",
-    description: "Un jeu de cartes inspiré de Mario 64 DS, maintenant en ligne",
+    description: "Un jeu en ligne de cartes inspiré de Mario 64 DS",
 };
 
-export default function RootLayout({children,}: { children: React.ReactNode; }) {
+export default function RootLayout({
+                                       children,
+                                   }: Readonly<{
+    children: React.ReactNode;
+}>) {
     return (
-        <html lang="fr" data-theme="dark">
-        <body className="flex flex-col min-h-screen bg-base-200 text-base-content">
-        <Header/>
-        <main className="flex-grow container mx-auto p-4">{children}</main>
-        <Footer/>
+        <html lang="fr">
+        <body className="min-h-screen">
+        <ThemeProvider>
+            <Header />
+            <main className="p-4">{children}</main>
+            <Footer />
+        </ThemeProvider>
         </body>
         </html>
     );
