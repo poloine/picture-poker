@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: USER
+      POSTGRES_PASSWORD: PASSWORD
+      POSTGRES_DB: picture_poker_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - picture-poker-network
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "8025:8025"  # Accès à l'interface web MailHog sur localhost:8025
+      - "1025:1025"  # SMTP
+    networks:
+      - picture-poker-network
+
+volumes:
+  postgres_data:
+
+networks:
+  picture-poker-network:
+    driver: bridge
