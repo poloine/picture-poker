@@ -1,10 +1,11 @@
-import express from 'express';
+import express from "express";
+import userController from "../controllers/userController.js";
+import { authenticate } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+router.get("/me", authenticate, userController.getProfile);
+
+router.get("/me/games", authenticate, userController.getGameHistory);
 
 export default router;
