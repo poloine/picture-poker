@@ -1,7 +1,7 @@
 import prisma from "../prisma/client.js";
 import { generateToken } from "../utils/jwt.js";
 import { hashPassword, comparePassword } from "../utils/hash.js";
-import { sendVerificationEmail } from "../utils/mailer.js";
+import {sendPasswordResetEmail, sendVerificationEmail} from "../utils/mailer.js";
 import { randomUUID } from "crypto";
 
 const authController = {
@@ -70,6 +70,66 @@ const authController = {
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: "Internal server error" });
+        }
+    },
+
+    forgotPassword: async (req, res) => {
+        const { email } = req.body;
+        try {
+            const user = await prisma.user.findUnique({ where: { email } });
+            if (!user)
+                return res.status(404).json({ error: "Aucun compte associé à cet email" });
+
+            const resetToken = randomUUID();
+            const expires = new Date(Date.now() + 60 * 60 * 1000); // 1h
+
+            await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    resetPasswordToken: resetToken,
+                    resetPasswordExpires: expires,
+                },
+            });
+
+            await sendPasswordResetEmail(user, resetToken);
+
+            res.json({ message: "Un email de réinitialisation a été envoyé." });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: "Erreur interne du serveur" });
+        }
+    },
+
+    resetPassword: async (req, res) => {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        try {
+            const user = await prisma.user.findFirst({
+                where: {
+                    resetPasswordToken: token,
+                    resetPasswordExpires: { gt: new Date() },
+                },
+            });
+
+            if (!user)
+                return res.status(400).json({ error: "Lien invalide ou expiré" });
+
+            const password_hash = await hashPassword(password);
+
+            await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    password_hash,
+                    resetPasswordToken: null,
+                    resetPasswordExpires: null,
+                },
+            });
+
+            res.json({ message: "Mot de passe réinitialisé avec succès !" });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: "Erreur interne du serveur" });
         }
     },
 };
