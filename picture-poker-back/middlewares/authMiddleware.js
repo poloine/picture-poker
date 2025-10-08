@@ -1,4 +1,3 @@
-// middlewares/authMiddleware.js
 import { extractBearerToken, verifyToken } from "../utils/jwt.js";
 import prisma from "../prisma/client.js";
 
@@ -10,7 +9,7 @@ export const authenticate = async (req, res, next) => {
     if (!token) return res.status(401).json({ error: "No token provided" });
 
     try {
-        const decoded = verifyToken(token);
+        const decoded = verifyToken(token, false);
         const user = await prisma.user.findUnique({ where: { id: decoded.id } });
         if (!user) return res.status(401).json({ error: "User not found" });
 
