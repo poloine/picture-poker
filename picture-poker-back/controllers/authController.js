@@ -3,6 +3,7 @@ import { generateToken } from "../utils/jwt.js";
 import { hashPassword, comparePassword } from "../utils/hash.js";
 import {sendPasswordResetEmail, sendVerificationEmail} from "../utils/mailer.js";
 import { randomUUID } from "crypto";
+import mjml2html from "mjml";
 
 const authController = {
     register: async (req, res) => {
@@ -45,7 +46,8 @@ const authController = {
                 data: { isVerified: true, verificationToken: null },
             });
 
-            res.json({ message: "Email verified successfully!" });
+            const { html } = mjml2html(mjmlVerifiedTemplate)
+            res.send(html);
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: "Internal server error" });
