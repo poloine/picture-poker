@@ -1,11 +1,12 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
-import {useEffect, useRef, useState} from "react";
-import {useAuth} from "@/context/AuthContext";
+import Image from "next/image";
 
 export default function AuthButton() {
+    const { user, logout } = useAuth();
     const [open, setOpen] = useState(false);
-    const { logout} = useAuth()
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -18,14 +19,54 @@ export default function AuthButton() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+
+    const getTitle = (score: number) => {
+        if (score >= 1000) return "Grand Master";
+        if (score >= 500) return "Master";
+        if (score >= 200) return "Expert";
+        if (score >= 100) return "Intermediate";
+        return "Rookie";
+    };
+
+
+    const getProfilePictureUrl = (blob?: Blob | string) => {
+        if (!blob) return "/default-avatar.png"; // image par défaut
+        if (typeof blob === "string") return blob;
+        return URL.createObjectURL(blob);
+    };
+
+    const title = user ? getTitle(user.score || 0) : "";
+    const profileUrl = getProfilePictureUrl(user?.profile_picture);
+
     return (
         <div className="relative" ref={ref}>
             <button
-                className="btn btn-sm btn-primary"
                 onClick={() => setOpen(!open)}
+                className="flex items-center gap-3 pl-2 pr-4 py-2 rounded-full bg-gradient-to-r bg-emerald-300 from-transparent to-emerald-300 hover:bg-green-400 transition-all duration-200 cursor-pointer"
             >
-                Profil
+                {/* Avatar */}
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20">
+                    <Image
+                        src={profileUrl}
+                        alt="avatar"
+                        width={40}
+                        height={40}
+                        className="object-cover w-full h-full"
+                    />
+                </div>
+
+                {/* Infos utilisateur */}
+                <div className="text-left leading-tight">
+                    <div className="text-sm font-semibold text-black/90">
+                        {user?.username ?? "Invité"}
+                    </div>
+                    <div className="text-xs text-black/70">
+                        {title} – {user?.money ?? 0}
+                    </div>
+                </div>
             </button>
+
+            {/* Menu déroulant */}
             {open && (
                 <ul className="absolute right-0 mt-2 w-48 bg-base-100 shadow-lg rounded-md z-[100] backdrop-blur-sm">
                     <li>
