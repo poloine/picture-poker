@@ -28,8 +28,6 @@ export default function LoginPage() {
         e.preventDefault();
         setError("");
         setLoading(true);
-        console.log(form);
-        console.log(process.env.NEXT_PUBLIC_API_URL)
 
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
@@ -41,7 +39,7 @@ export default function LoginPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error ?? "Erreur de connexion");
 
-            login(data.token);
+            login(data.accessToken, data.refreshToken);
             redirectToProfile();
         } catch (err: any) {
             setError(err.message);
