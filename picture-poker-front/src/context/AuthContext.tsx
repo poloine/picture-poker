@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import {router} from "next/client";
+import {useRouter} from "next/navigation";
 
 interface AuthContextType {
     user: User | null;
@@ -31,19 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [refreshToken, setRefreshToken] = useState<string | null>(null);
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const storedAccess = localStorage.getItem("accessToken");
-        const storedRefresh = localStorage.getItem("refreshToken");
-
-        if (storedAccess && storedRefresh) {
-            setAccessToken(storedAccess);
-            setRefreshToken(storedRefresh);
-            fetchProfile(storedAccess);
-        } else {
-            setLoading(false);
-        }
-    }, []);
+    const router = useRouter();
 
     const fetchProfile = async (tkn: string) => {
         try {
@@ -127,6 +115,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         return res;
     }
+
+    useEffect(() => {
+        const storedAccess = localStorage.getItem("accessToken");
+        const storedRefresh = localStorage.getItem("refreshToken");
+
+        if (storedAccess && storedRefresh) {
+            setAccessToken(storedAccess);
+            setRefreshToken(storedRefresh);
+            fetchProfile(storedAccess);
+        } else {
+            setLoading(false);
+        }
+    }, []);
 
     return (
         <AuthContext.Provider
