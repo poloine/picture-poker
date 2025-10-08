@@ -12,15 +12,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
                                        children,
-                                   }: Readonly<{
+                                   }: {
     children: React.ReactNode;
-}>) {
+}) {
     return (
         <html lang="fr">
-        <body className="min-h-screen">
+        <body className="min-h-screen flex flex-col">
         <ThemeProvider>
             <Header />
-            <main className="p-4">{children}</main>
+            <main className="flex-grow p-4">{children}</main>
             <Footer />
         </ThemeProvider>
         </body>
