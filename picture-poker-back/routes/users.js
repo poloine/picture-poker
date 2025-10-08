@@ -4,7 +4,7 @@ import { authenticate } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/me", authenticate, userController.getProfile);
+router.get("/me", authenticate, userController.getUserProfile);
 
 router.get("/me/games", authenticate, userController.getGameHistory);
 

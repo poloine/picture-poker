@@ -1,7 +1,7 @@
 import prisma from "../prisma/client.js";
 
 const userController = {
-    getProfile: async (req, res) => {
+    getUserProfile: async (req, res) => {
         const user = req.user;
         res.json({
             id: user.id,
