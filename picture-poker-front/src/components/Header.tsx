@@ -9,8 +9,8 @@ export default function Header() {
 
     return (
         <header className="navbar bg-base-100 shadow-md">
-            <div className="container mx-auto my-4 flex justify-between items-center">
-                <Link href="/" className="text-2xl font-bold text-primary">
+            <div className="container mx-auto py-1 flex justify-between items-center">
+                <Link href="/" className="text-2xl font-bold text-primary my-4">
                     🎴 Picture Poker
                 </Link>
 
@@ -18,10 +18,10 @@ export default function Header() {
                     <nav className="flex items-center gap-4">
                         {isAuthenticated ? (
                             <>
-                                <Link href="/game/new" className="hover:text-primary">
+                                <Link href="/game/new" className="text-m px-4 py-2 rounded-2xl bg-fuchsia-400 text-fuchsia-950 hover:text-primary">
                                     Créer un salon
                                 </Link>
-                                <Link href="/game/join" className="hover:text-primary">
+                                <Link href="/game/join" className="text-m px-4 py-2 rounded-2xl bg-yellow-300 text-yellow-950 hover:text-primary">
                                     Rejoindre
                                 </Link>
                                 <AuthButton />
