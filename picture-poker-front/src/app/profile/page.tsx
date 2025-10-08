@@ -1,13 +1,20 @@
 "use client";
 import {useAuth} from "@/context/AuthContext";
+import {useRouter} from "next/navigation";
+import {useEffect} from "react";
 
 export default function ProfilePage() {
-    const { user, loading, logout } = useAuth();
+    const { user, isAuthenticated, loading, logout } = useAuth();
+    const router = useRouter();
 
-    if (loading) return <p>Chargement...</p>;
+    useEffect(() => {
+        if (!isAuthenticated || !user) {
+            router.push("/login");
+        }
+    }, [user, isAuthenticated, router]);
+
+    if (loading) return <p className="text-center mt-20">Chargement...</p>;
     if (!user) return <p>Non connecté</p>;
-
-    if (!user) return <p className="text-center mt-20">Chargement...</p>;
 
     return (
         <div className="max-w-lg mx-auto bg-base-100 shadow-lg rounded-lg p-6 mt-10">
