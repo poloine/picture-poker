@@ -14,7 +14,7 @@ export default function Header() {
 
     return (
         <header className="navbar bg-base-100 shadow-md">
-            <div className="container mx-auto flex justify-between items-center">
+            <div className="container mx-auto my-4 flex justify-between items-center">
                 <Link href="/" className="text-2xl font-bold text-primary">
                     🎴 Picture Poker
                 </Link>
