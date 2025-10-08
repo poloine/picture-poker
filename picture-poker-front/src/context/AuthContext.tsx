@@ -33,11 +33,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
-    const fetchProfile = async (tkn: string) => {
+    const fetchProfile = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-                headers: { Authorization: `Bearer ${tkn}` },
-            });
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/users/me`);
+            if (res.status === 304) return; // Not modified
             if (!res.ok) throw new Error("Unauthorized");
             const data = await res.json();
             setUser(data);
@@ -54,7 +53,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem("refreshToken", refresh);
         setAccessToken(access);
         setRefreshToken(refresh);
-        fetchProfile(access);
     };
 
     const logout = () => {
@@ -123,11 +121,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (storedAccess && storedRefresh) {
             setAccessToken(storedAccess);
             setRefreshToken(storedRefresh);
-            fetchProfile(storedAccess);
         } else {
             setLoading(false);
         }
-    }, []);
+    }, [accessToken, refreshToken]);
+
+    useEffect(() => {
+        if (accessToken && refreshToken && !user) {
+            fetchProfile();
+        }
+    }, [accessToken, refreshToken]);
 
     return (
         <AuthContext.Provider

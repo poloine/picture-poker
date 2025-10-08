@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-    const router = useRouter();
     const [form, setForm] = useState({
         username: "",
         email: "",
@@ -36,9 +34,6 @@ export default function RegisterPage() {
 
             setSuccess("Inscription réussie ! Vérifiez votre email pour valider votre compte.");
             setForm({ username: "", email: "", password: "" });
-
-            // Optionnel : redirige après quelques secondes
-            setTimeout(() => router.push("/login"), 2500);
         } catch (err: any) {
             setError(err.message);
         } finally {

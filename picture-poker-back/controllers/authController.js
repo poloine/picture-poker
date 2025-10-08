@@ -4,6 +4,7 @@ import {sendPasswordResetEmail, sendVerificationEmail} from "../utils/mailer.js"
 import { randomUUID } from "crypto";
 import mjml2html from "mjml";
 import {generateAccessToken, generateRefreshToken, verifyToken} from "../utils/jwt.js";
+import bcrypt from "bcryptjs";
 
 
 const authController = {
@@ -177,6 +178,40 @@ const authController = {
         } catch (err) {
             console.error(err);
             res.status(403).json({ error: "Invalid refresh token" });
+        }
+    },
+
+    changePassword: async (req, res) => {
+        const userId = req.user.id;
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: "Les deux champs sont requis." });
+        }
+
+        try {
+            const user = await prisma.user.findUnique({ where: { id: userId } });
+            if (!user) {
+                return res.status(404).json({ error: "Utilisateur non trouvé." });
+            }
+            console.log(user)
+
+            const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+            if (!isMatch) {
+                return res.status(401).json({ error: "Ancien mot de passe incorrect." });
+            }
+
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            await prisma.user.update({
+                where: { id: userId },
+                data: { password_hash: hashedPassword },
+            });
+
+            res.json({ message: "Mot de passe mis à jour avec succès." });
+        } catch (err) {
+            console.error("Erreur changement mot de passe :", err);
+            res.status(500).json({ error: "Erreur serveur lors du changement de mot de passe." });
         }
     }
 };

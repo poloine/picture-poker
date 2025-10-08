@@ -1,5 +1,6 @@
 import express from "express";
 import authController from "../controllers/authController.js";
+import {authenticate} from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -16,5 +17,7 @@ router.post('/reset-password/:token', authController.resetPassword);
 router.get("/verify-email/:token", authController.verifyEmail);
 
 router.post("/refresh", authController.refreshToken);
+
+router.patch("/change-password", authenticate, authController.changePassword);
 
 export default router;
