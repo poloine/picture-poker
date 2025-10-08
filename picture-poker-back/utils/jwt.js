@@ -32,7 +32,8 @@ export const verifyToken = (token, isRefresh = false) => {
             : process.env.JWT_SECRET;
         return jwt.verify(token, secret);
     } catch (err) {
-        return null;
+        console.error(err);
+        throw new Error("Unable to verify token");
     }
 };
 
