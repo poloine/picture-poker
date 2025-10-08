@@ -21,6 +21,7 @@ interface User {
     score: number;
     money: number;
     created_at: string;
+    profile_picture: string | Blob;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
