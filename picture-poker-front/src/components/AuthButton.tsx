@@ -1,19 +1,25 @@
 "use client";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import {useEffect, useRef, useState} from "react";
+import {useAuth} from "@/context/AuthContext";
 
 export default function AuthButton() {
-    const router = useRouter();
     const [open, setOpen] = useState(false);
+    const { logout} = useAuth()
+    const ref = useRef<HTMLDivElement>(null);
 
-    const logout = () => {
-        localStorage.removeItem("token");
-        router.push("/login");
-    };
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     return (
-        <div className="relative">
+        <div className="relative" ref={ref}>
             <button
                 className="btn btn-sm btn-primary"
                 onClick={() => setOpen(!open)}
@@ -21,11 +27,11 @@ export default function AuthButton() {
                 Profil
             </button>
             {open && (
-                <ul className="absolute right-0 mt-2 w-48 bg-base-100 shadow-md rounded-md z-50">
+                <ul className="absolute right-0 mt-2 w-48 bg-base-100 shadow-lg rounded-md z-[100] backdrop-blur-sm">
                     <li>
                         <Link
                             href="/profile"
-                            className="block px-4 py-2 hover:bg-base-200"
+                            className="block px-4 py-2 hover:bg-base-200 rounded-t-md"
                             onClick={() => setOpen(false)}
                         >
                             Mon profil
@@ -33,7 +39,7 @@ export default function AuthButton() {
                     </li>
                     <li>
                         <button
-                            className="w-full text-left px-4 py-2 hover:bg-base-200"
+                            className="w-full text-left px-4 py-2 hover:bg-base-200 rounded-b-md"
                             onClick={logout}
                         >
                             Déconnexion

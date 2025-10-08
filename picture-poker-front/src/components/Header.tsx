@@ -1,16 +1,11 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import AuthButton from "./AuthButton";
 import ThemeToggle from "./ThemeToggle";
+import {useAuth} from "@/context/AuthContext";
 
 export default function Header() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        setIsLoggedIn(!!token);
-    }, []);
+    const { isAuthenticated, loading } = useAuth();
 
     return (
         <header className="navbar bg-base-100 shadow-md">
@@ -19,25 +14,27 @@ export default function Header() {
                     🎴 Picture Poker
                 </Link>
 
-                <nav className="flex items-center gap-4">
-                    {isLoggedIn ? (
-                        <>
-                            <Link href="/game/new" className="hover:text-primary">
-                                Créer un salon
-                            </Link>
-                            <Link href="/game/join" className="hover:text-primary">
-                                Rejoindre
-                            </Link>
-                            <AuthButton />
-                        </>
-                    ) : (
-                        <>
-                            <Link href="/login" className="hover:text-primary">Connexion</Link>
-                            <Link href="/register" className="hover:text-primary">Inscription</Link>
-                        </>
-                    )}
-                    <ThemeToggle />
-                </nav>
+                {!loading && (
+                    <nav className="flex items-center gap-4">
+                        {isAuthenticated ? (
+                            <>
+                                <Link href="/game/new" className="hover:text-primary">
+                                    Créer un salon
+                                </Link>
+                                <Link href="/game/join" className="hover:text-primary">
+                                    Rejoindre
+                                </Link>
+                                <AuthButton />
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/login" className="hover:text-primary">Connexion</Link>
+                                <Link href="/register" className="hover:text-primary">Inscription</Link>
+                            </>
+                        )}
+                        <ThemeToggle />
+                    </nav>
+                )}
             </div>
         </header>
     );

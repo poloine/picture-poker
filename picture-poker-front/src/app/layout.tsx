@@ -1,9 +1,10 @@
 import "@/styles/globals.css";
 import "@/styles/themes.css";
-import { ThemeProvider } from "@/context/ThemeContext";
+import {ThemeProvider} from "@/context/ThemeContext";
 import Header from "@/components/Header";
 import {Metadata} from "next";
 import Footer from "@/components/Footer";
+import {AuthProvider} from "@/context/AuthContext";
 
 export const metadata: Metadata = {
     title: "Picture Poker",
@@ -18,11 +19,13 @@ export default function RootLayout({
     return (
         <html lang="fr">
         <body className="min-h-screen flex flex-col">
-        <ThemeProvider>
-            <Header />
-            <main className="flex-grow p-4">{children}</main>
-            <Footer />
-        </ThemeProvider>
+        <AuthProvider>
+            <ThemeProvider>
+                <Header/>
+                <main className="flex-grow p-4">{children}</main>
+                <Footer/>
+            </ThemeProvider>
+        </AuthProvider>
         </body>
         </html>
     );
