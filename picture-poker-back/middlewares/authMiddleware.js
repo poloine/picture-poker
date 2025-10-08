@@ -1,13 +1,13 @@
 // middlewares/authMiddleware.js
-import { verifyToken } from "../utils/jwt.js";
+import { extractBearerToken, verifyToken } from "../utils/jwt.js";
 import prisma from "../prisma/client.js";
 
 export const authenticate = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: "Missing token" });
 
-    const token = authHeader.split(" ")[1];
-    if (!token) return res.status(401).json({ error: "Invalid token" });
+    const token = extractBearerToken(req.headers.authorization);
+    if (!token) return res.status(401).json({ error: "No token provided" });
 
     try {
         const decoded = verifyToken(token);

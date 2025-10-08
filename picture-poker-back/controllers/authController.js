@@ -1,9 +1,10 @@
 import prisma from "../prisma/client.js";
-import { generateToken } from "../utils/jwt.js";
 import { hashPassword, comparePassword } from "../utils/hash.js";
 import {sendPasswordResetEmail, sendVerificationEmail} from "../utils/mailer.js";
 import { randomUUID } from "crypto";
 import mjml2html from "mjml";
+import {generateAccessToken, generateRefreshToken, verifyToken} from "../utils/jwt.js";
+
 
 const authController = {
     register: async (req, res) => {
@@ -67,12 +68,30 @@ const authController = {
             const valid = await comparePassword(password, user.password_hash);
             if (!valid) return res.status(400).json({ error: "Invalid credentials" });
 
-            const token = generateToken(user);
-            res.json({ message: "Logged in", token });
+            const accessToken = generateAccessToken(user);
+            const refreshToken = await generateRefreshToken(user);
+
+            await prisma.refreshToken.create({
+                data: {
+                    userId: user.id,
+                    token: refreshToken,
+                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                },
+            });
+
+            res.json({ message: "Logged in", accessToken, refreshToken });
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: "Internal server error" });
         }
+    },
+
+    logout: async (req, res) => {
+        const { refreshToken } = req.body;
+        if (refreshToken) {
+            await prisma.refreshToken.deleteMany({ where: { token: refreshToken } });
+        }
+        res.json({ message: "Logged out" });
     },
 
     forgotPassword: async (req, res) => {
@@ -134,6 +153,32 @@ const authController = {
             res.status(500).json({ error: "Erreur interne du serveur" });
         }
     },
+
+    refreshToken: async (req, res) => {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) return res.status(401).json({ error: "No token provided" });
+
+        try {
+            const stored = await prisma.refreshToken.findUnique({
+                where: { token: refreshToken },
+                include: { user: true },
+            });
+
+            if (!stored) return res.status(403).json({ error: "Invalid token" });
+            if (new Date() > stored.expiresAt)
+                return res.status(403).json({ error: "Token expired" });
+
+            const valid = verifyToken(refreshToken, true);
+            if (!valid) return res.status(403).json({ error: "Invalid token" });
+
+            const newAccessToken = generateAccessToken(stored.user);
+            res.json({ accessToken: newAccessToken });
+        } catch (err) {
+            console.error(err);
+            res.status(403).json({ error: "Invalid refresh token" });
+        }
+    }
 };
 
 export default authController;

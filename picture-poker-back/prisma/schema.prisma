@@ -28,9 +28,10 @@ model User {
   isVerified           Boolean   @default(false)
   verificationToken    String?
 
-  gamesCreated Game[]       @relation("CreatedGames")
+  gamesCreated Game[]         @relation("CreatedGames")
   gamePlayers  GamePlayer[]
-  roundsWon    Round[]      @relation("RoundWinners")
+  roundsWon    Round[]        @relation("RoundWinners")
+  RefreshToken RefreshToken[]
 }
 
 model Game {
@@ -65,4 +66,13 @@ model Round {
 
   game   Game  @relation(fields: [game_id], references: [uuid])
   winner User? @relation("RoundWinners", fields: [winner_id], references: [id])
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 }
