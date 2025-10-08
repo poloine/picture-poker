@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { useRouter } from "next/navigation";
 import {useAuth} from "@/context/AuthContext";
 
@@ -11,14 +11,11 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const { login, isAuthenticated } = useAuth();
 
-    const redirectToProfile = () => {
-        router.push("/profile");
-    }
-
-    if (isAuthenticated) {
-        redirectToProfile();
-        return null;
-    }
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.push("/profile");
+        }
+    }, [isAuthenticated, router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -40,7 +37,6 @@ export default function LoginPage() {
             if (!res.ok) throw new Error(data.error ?? "Erreur de connexion");
 
             login(data.accessToken, data.refreshToken);
-            redirectToProfile();
         } catch (err: any) {
             setError(err.message);
         } finally {
